@@ -95,7 +95,7 @@ function placeMoveAnimated(r, c, player, flips, done){
       if(index === flips.length - 1 && done){
         setTimeout(done, 450);
       }
-    }, index * 150); // 每顆依序翻
+    }, index * 300); // 每顆依序翻
   });
 
   if(flips.length === 0 && done) done();
@@ -172,4 +172,5 @@ function render(){
 
 restartBtn.onclick=initBoard;
 initBoard();
+
 
