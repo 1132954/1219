@@ -80,27 +80,48 @@ h1{
 }
 
 /* 棋子 */
+/* 棋子容器（3D 翻轉） */
 .piece{
   width:78%;
   height:78%;
-  border-radius:50%;
-  box-shadow:0 4px 10px rgba(0,0,0,.35);
-  transition: transform .3s;
+  position:relative;
+  transform-style: preserve-3d;
+  transition: transform 0.45s ease;
 }
 
-.piece.black{
-  background:radial-gradient(circle at 30% 30%,#444,#000);
-}
-
-.piece.white{
-  background:radial-gradient(circle at 30% 30%,#fff,#e5e7eb);
-  border:1px solid rgba(0,0,0,.1);
-}
-
-/* 翻棋動畫 */
+/* 翻面時 */
 .piece.flip{
   transform: rotateY(180deg);
 }
+
+/* 正反面 */
+.piece::before,
+.piece::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  backface-visibility: hidden;
+  box-shadow:0 4px 10px rgba(0,0,0,.35);
+}
+
+/* 黑棋正面 */
+.piece.black::before{
+  background: radial-gradient(circle at 30% 30%, #444, #000);
+}
+
+/* 白棋正面 */
+.piece.white::before{
+  background: radial-gradient(circle at 30% 30%, #fff, #e5e7eb);
+  border:1px solid rgba(0,0,0,.1);
+}
+
+/* 背面（翻過去的那一面） */
+.piece::after{
+  transform: rotateY(180deg);
+  background: radial-gradient(circle at 30% 30%, #fff, #e5e7eb);
+}
+
 
 /* 可下位置 */
 .cell.possible{
@@ -122,3 +143,4 @@ h1{
 @media(max-width:520px){
   :root{ --board-size:360px }
 }
+
