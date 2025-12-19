@@ -1,33 +1,191 @@
 :root{
-    --board-size: 480px; /* 棋盤視覺大小 */
-    --cell-size: calc(var(--board-size) / 8);
-    }
-    *{box-sizing:border-box}
-    body{font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Noto Sans TC', 'Microsoft JhengHei', sans-serif; background:#f2f6f9;
-    color:#1f2937; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0}
-    .container{width:calc(var(--board-size) + 40px);}
-    h1{text-align:center;margin:0 0 12px}
-    controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-  .controls .status, .controls .score{font-weight:600}
-  #restartBtn{padding:6px 10px;border-radius:6px;border:1px solid
-#cbd5e1;background:#fff;cursor:pointer}
-.board-wrap{background:linear-gradient(180deg,#e6f0ea,#dbeee0);padding:10px;border-radius:12px;box-shadow:0 6px 18px rgba(15,23,42,0.08)}
-.board{width:var(--board-size);height:var(--board-size);display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);gap:4px;padding:4px;background:#2b6b3f;border-radius:8px}
-.cell{position:relative;width:100%;height:100%;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
-.cell::after{content:"";position:absolute;inset:6px;border-radius:6px}
-.cell .piece{width:calc(var(--cell-size) * 0.78);height:calc(var(--cell-size) *
-0.78);border-radius:50%;box-shadow:0 3px 6px
-rgba(2,6,23,0.2);transform:scale(1);transition:transform .12s}
-.cell .hint{position:absolute;right:4px;bottom:4px;font-size:12px;font-weight:700;line-height:1;color:#0b3f1a}
-.cell.hint-available{outline:3px solid rgba(255,255,255,0.06)}
-.cell.available::after{background:lineargradient(180deg,rgba(255,255,255,0.08),rgba(0,0,0,0.06));}
-.cell.available .hint{display:block}
-.piece.black{background:#111;}
-.piece.white{background:#fff;border:1px solid rgba(0,0,0,0.06)}
-.cell.empty::after{background:transparent}
-.cell.possible{background:linear-gradient(180deg, rgba(45,157,85,0.15),
-rgba(45,157,85,0.08));}
-.cell.disabled{cursor:default;opacity:0.9}
-.legend{margin-top:10px;font-size:13px;color:#334155}
-@media (max-width:520px){:root{--board-size:360px}}
+  --board-size: 480px;
+  --cell-size: calc(var(--board-size) / 8);
+  --green-dark: #1f5f3a;
+  --green-mid: #2b6b3f;
+  --green-light: #4fa56a;
+}
+
+*{
+  box-sizing: border-box;
+}
+
+body{
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  background:
+    radial-gradient(circle at top, #ffffff, #e8f0f5);
+  color:#1f2937;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  margin:0;
+}
+
+.container{
+  width: calc(var(--board-size) + 40px);
+}
+
+h1{
+  text-align:center;
+  margin:0 0 14px;
+  letter-spacing:1px;
+}
+
+/* 上方控制列 */
+.controls{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+
+.controls .status,
+.controls .score{
+  font-weight:600;
+}
+
+#restartBtn{
+  padding:6px 12px;
+  border-radius:8px;
+  border:1px solid #cbd5e1;
+  background:linear-gradient(180deg,#fff,#f1f5f9);
+  cursor:pointer;
+  transition:all .15s;
+}
+
+#restartBtn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 10px rgba(0,0,0,0.12);
+}
+
+/* 棋盤外框 */
+.board-wrap{
+  background:
+    linear-gradient(180deg,#eaf5ef,#d9efe4);
+  padding:12px;
+  border-radius:14px;
+  box-shadow:
+    0 8px 24px rgba(15,23,42,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+/* 棋盤 */
+.board{
+  width:var(--board-size);
+  height:var(--board-size);
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  grid-template-rows:repeat(8,1fr);
+  gap:4px;
+  padding:4px;
+  background:
+    linear-gradient(180deg,var(--green-light),var(--green-mid));
+  border-radius:10px;
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,0.15);
+}
+
+/* 格子 */
+.cell{
+  position:relative;
+  width:100%;
+  height:100%;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
+  background:
+    linear-gradient(180deg,#3fa36a,#2f8a58);
+  transition:filter .12s;
+}
+
+.cell:hover{
+  filter:brightness(1.05);
+}
+
+.cell::after{
+  content:"";
+  position:absolute;
+  inset:6px;
+  border-radius:6px;
+}
+
+/* 棋子 */
+.cell .piece{
+  width:calc(var(--cell-size) * 0.78);
+  height:calc(var(--cell-size) * 0.78);
+  border-radius:50%;
+  box-shadow:
+    0 4px 10px rgba(2,6,23,0.35),
+    inset 0 2px 3px rgba(255,255,255,0.35);
+  animation: drop .15s ease-out;
+}
+
+@keyframes drop{
+  from{ transform:scale(0.6); }
+  to{ transform:scale(1); }
+}
+
+.piece.black{
+  background:radial-gradient(circle at 30% 30%, #444, #000);
+}
+
+.piece.white{
+  background:radial-gradient(circle at 30% 30%, #fff, #e5e7eb);
+  border:1px solid rgba(0,0,0,0.08);
+}
+
+/* 可下位置 */
+.cell.possible{
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,0.18),
+      rgba(0,0,0,0.08)
+    );
+}
+
+.cell.possible::after{
+  background:
+    radial-gradient(circle,
+      rgba(255,255,255,0.35),
+      rgba(255,255,255,0.05)
+    );
+}
+
+/* 翻子提示數 */
+.cell .hint{
+  position:absolute;
+  right:6px;
+  bottom:6px;
+  font-size:12px;
+  font-weight:700;
+  color:#064e3b;
+  background:rgba(255,255,255,0.75);
+  padding:2px 5px;
+  border-radius:999px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* 不能下 */
+.cell.disabled{
+  cursor:default;
+  opacity:0.92;
+}
+
+/* 下方說明 */
+.legend{
+  margin-top:10px;
+  font-size:13px;
+  color:#334155;
+  text-align:center;
+}
+
+/* RWD */
+@media (max-width:520px){
+  :root{
+    --board-size:360px;
+  }
+}
