@@ -89,7 +89,7 @@ h1{
   height:78%;
   position:relative;
   transform-style: preserve-3d;
-  transition: transform 0.8s ease;
+  transition: transform 1s ease;
 }
 
 /* 翻面狀態 */
@@ -153,6 +153,7 @@ h1{
     --board-size:360px;
   }
 }
+
 
 
 
