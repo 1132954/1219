@@ -1,163 +1,150 @@
 const SIZE = 8;
-let board = [], current = 1; // 1=玩家(黑) 2=電腦(白)
-
+let board = [];
+let currentPlayer = 1; // 1=黑, 2=白
 const boardEl = document.getElementById('board');
 const currentPlayerEl = document.getElementById('currentPlayer');
 const blackScoreEl = document.getElementById('blackScore');
 const whiteScoreEl = document.getElementById('whiteScore');
 const restartBtn = document.getElementById('restartBtn');
 
-const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
-
-// 初始化棋盤
-function initBoard(){
-  board = Array.from({length:SIZE},()=>Array(SIZE).fill(0));
-  const m = SIZE/2;
-  board[m-1][m-1]=2; board[m][m]=2; board[m-1][m]=1; board[m][m-1]=1;
-  current=1;
-  render();
+function initBoard() {
+    board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+    board[3][3] = 2;
+    board[3][4] = 1;
+    board[4][3] = 1;
+    board[4][4] = 2;
+    renderBoard();
+    updateScores();
+    currentPlayer = 1;
+    updateCurrentPlayerText();
 }
 
-// 判斷座標是否在棋盤內
-function within(r,c){ return r>=0 && r<SIZE && c>=0 && c<SIZE; }
-
-// 計算落子可翻棋
-function flipsForMove(r,c,player){
-  if(board[r][c]!==0) return [];
-  const opp = player===1?2:1;
-  let result=[];
-  for(const [dr,dc] of DIRS){
-    let rr=r+dr, cc=c+dc, line=[];
-    while(within(rr,cc)&&board[rr][cc]===opp){ line.push([rr,cc]); rr+=dr; cc+=dc; }
-    if(line.length && within(rr,cc) && board[rr][cc]===player) result=result.concat(line);
-  }
-  return result;
-}
-
-// 取得所有合法落子
-function getLegalMoves(player){
-  const m=new Map();
-  for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
-    const f=flipsForMove(r,c,player);
-    if(f.length) m.set(`${r},${c}`,f);
-  }
-  return m;
-}
-
-// 計算分數
-function computeScore(){
-  let b=0,w=0;
-  board.flat().forEach(v=>{ if(v===1)b++; if(v===2)w++; });
-  return {b,w};
-}
-
-// 放置棋子並依序翻棋動畫
-function placeMoveAnimated(r,c,player,flips,done){
-  board[r][c]=player;
-  render();
-
-  let index=0;
-  function flipNext(){
-    if(index>=flips.length){
-      if(done) done(); // 所有棋翻完才呼叫回呼
-      return;
+function renderBoard() {
+    boardEl.innerHTML = '';
+    for (let y = 0; y < SIZE; y++) {
+        for (let x = 0; x < SIZE; x++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.dataset.x = x;
+            cell.dataset.y = y;
+            cell.addEventListener('click', () => playerMove(x, y));
+            if (board[y][x] === 1) {
+                const piece = document.createElement('div');
+                piece.classList.add('piece', 'black');
+                cell.appendChild(piece);
+            } else if (board[y][x] === 2) {
+                const piece = document.createElement('div');
+                piece.classList.add('piece', 'white');
+                cell.appendChild(piece);
+            }
+            boardEl.appendChild(cell);
+        }
     }
-    const [rr,cc]=flips[index];
-    const piece=document.querySelector(`.cell[data-r="${rr}"][data-c="${cc}"] .piece`);
-    if(piece){
-      piece.classList.add('flip');
-      setTimeout(()=>{
-        board[rr][cc]=player;
-        render();
-      }, 500);
-      setTimeout(()=>{
-        index++;
-        flipNext();
-      }, 600); // 每顆棋翻 600ms
-    }else{index++; flipNext();}
-  }
-  flipNext();
-
-  // 如果沒有要翻的棋，直接呼叫 done
-  if(flips.length===0 && done) done();
 }
 
-
-// AI 行動
-function aiMove(){
-  if(current!==2) return;
-  const moves=getLegalMoves(2);
-  if(moves.size===0){ current=1; render(); return; }
-
-  // 簡單策略：選擇翻棋最多的落子
-  let best=null, max=-1;
-  for(const [k,f] of moves){
-    if(f.length>max){ max=f.length; const [r,c]=k.split(',').map(Number); best={r,c,flips:f}; }
-  }
-
-  placeMoveAnimated(best.r,best.c,2,best.flips, ()=>{
-    current=1;
-    render();
-    checkEnd();
-  });
+function updateCurrentPlayerText() {
+    currentPlayerEl.textContent = currentPlayer === 1 ? '黑棋' : '白棋';
 }
 
-// 渲染棋盤
-function render(){
-  boardEl.innerHTML='';
-  const moves=getLegalMoves(current);
-
-  for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
-    const cell=document.createElement('div'); cell.className='cell'; cell.dataset.r=r; cell.dataset.c=c;
-    if(board[r][c]){
-      const p=document.createElement('div');
-      p.className='piece '+(board[r][c]===1?'black':'white');
-      cell.appendChild(p);
+function updateScores() {
+    let black = 0, white = 0;
+    for (let row of board) {
+        for (let cell of row) {
+            if (cell === 1) black++;
+            if (cell === 2) white++;
+        }
     }
-
-    const key=`${r},${c}`;
-    if(current===1 && moves.has(key)){
-      cell.classList.add('possible');
-      const h=document.createElement('div');
-      h.className='hint';
-      h.textContent = moves.get(key).length;
-      cell.appendChild(h);
-
-      // 玩家下棋
-      cell.onclick = ()=>{
-        const flips = moves.get(key);
-        placeMoveAnimated(r,c,1,flips,()=>{
-          current=2;
-          render();
-          aiMove(); // 玩家動畫完成後，AI 才行動
-        });
-      };
-    } else { cell.classList.add('disabled'); }
-
-    boardEl.appendChild(cell);
-  }
-
-  const s=computeScore();
-  blackScoreEl.textContent = s.b;
-  whiteScoreEl.textContent = s.w;
-  currentPlayerEl.textContent = current===1?'黑（你）':'白（電腦）';
+    blackScoreEl.textContent = black;
+    whiteScoreEl.textContent = white;
 }
 
-// 判斷遊戲是否結束
-function checkEnd(){
-  if(getLegalMoves(1).size===0 && getLegalMoves(2).size===0){
-    const s=computeScore();
-    alert(`遊戲結束！\n黑：${s.b} 白：${s.w}`);
-  }
+const directions = [
+    [-1,-1], [-1,0], [-1,1],
+    [0,-1],         [0,1],
+    [1,-1], [1,0], [1,1]
+];
+
+function isValidMove(x, y, player) {
+    if (board[y][x] !== 0) return false;
+    for (let [dx, dy] of directions) {
+        let nx = x + dx, ny = y + dy;
+        let foundOpponent = false;
+        while (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE) {
+            if (board[ny][nx] === 0) break;
+            if (board[ny][nx] === 3 - player) {
+                foundOpponent = true;
+            } else if (board[ny][nx] === player) {
+                if (foundOpponent) return true;
+                else break;
+            } else {
+                break;
+            }
+            nx += dx;
+            ny += dy;
+        }
+    }
+    return false;
 }
 
-restartBtn.onclick = initBoard;
+function getValidMoves(player) {
+    let moves = [];
+    for (let y = 0; y < SIZE; y++) {
+        for (let x = 0; x < SIZE; x++) {
+            if (isValidMove(x, y, player)) moves.push([x, y]);
+        }
+    }
+    return moves;
+}
+
+function makeMove(x, y, player) {
+    if (!isValidMove(x, y, player)) return false;
+    board[y][x] = player;
+    for (let [dx, dy] of directions) {
+        let nx = x + dx, ny = y + dy;
+        let path = [];
+        while (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE) {
+            if (board[ny][nx] === 0) break;
+            if (board[ny][nx] === 3 - player) {
+                path.push([nx, ny]);
+            } else if (board[ny][nx] === player) {
+                for (let [px, py] of path) board[py][px] = player;
+                break;
+            } else {
+                break;
+            }
+            nx += dx;
+            ny += dy;
+        }
+    }
+    updateScores();
+    renderBoard();
+    return true;
+}
+
+function playerMove(x, y) {
+    if (!makeMove(x, y, currentPlayer)) return;
+    currentPlayer = 3 - currentPlayer;
+    updateCurrentPlayerText();
+    setTimeout(aiMove, 300); // AI 延遲
+}
+
+function aiMove() {
+    const moves = getValidMoves(currentPlayer);
+    if (moves.length === 0) {
+        currentPlayer = 3 - currentPlayer;
+        updateCurrentPlayerText();
+        return;
+    }
+    // 簡單 AI: 隨機選一個合法走法
+    const [x, y] = moves[Math.floor(Math.random() * moves.length)];
+    makeMove(x, y, currentPlayer);
+    currentPlayer = 3 - currentPlayer;
+    updateCurrentPlayerText();
+}
+
+restartBtn.addEventListener('click', initBoard);
+
 initBoard();
-
-
-
-
-
 
 
 
