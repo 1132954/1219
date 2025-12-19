@@ -3,23 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>黑白棋 AI 對戰</title>
+<title>立體黑白棋</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-    <h1>Othello / Reversi</h1>
+  <div class="container">
+    <h1>立體黑白棋</h1>
     <div class="controls">
-        <span>輪到：<span id="currentPlayer">黑棋</span></span>
-        <span>黑：<span id="blackScore">2</span> 白：<span id="whiteScore">2</span></span>
-        <button id="restartBtn">重新開始</button>
+      <div>玩家：<span id="currentPlayer"></span></div>
+      <div>黑棋：<span id="blackScore">2</span> 白棋：<span id="whiteScore">2</span></div>
+      <button id="restartBtn">重新開始</button>
     </div>
     <div class="board-wrap">
-        <div class="board" id="board"></div>
+      <div id="board" class="board"></div>
     </div>
-    <p>提示：綠色格子為可下的位置；右下角數字顯示該位置下子後可翻轉數量。</p>
-</div>
+  </div>
 <script src="script.js"></script>
 </body>
 </html>
-

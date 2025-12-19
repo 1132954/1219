@@ -1,49 +1,49 @@
 :root{
-    --board-size: 480px;
-    --cell-size: calc(var(--board-size)/8);
-}
-
-/* ===== 全域設定 ===== */
-* { box-sizing: border-box; }
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
-    background: radial-gradient(circle at top,#ffffff,#e8f0f5);
-    color:#1f2937;
+    --board-size:480px;
+    --cell-size:calc(var(--board-size)/8);
+  }
+  
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
+    background: radial-gradient(circle at top,#fff,#e8f0f5);
     display:flex;
     justify-content:center;
     align-items:center;
     min-height:100vh;
     margin:0;
-}
-
-.container { width: calc(var(--board-size)+40px); }
-h1 { text-align:center; margin:0 0 14px; }
-
-.controls {
+    color:#1f2937;
+  }
+  
+  .container { width: calc(var(--board-size)+40px); }
+  h1 { text-align:center; margin:0 0 14px; }
+  
+  .controls {
     display:flex;
     justify-content:space-between;
     align-items:center;
     margin-bottom:12px;
     font-weight:600;
-}
-#restartBtn {
+  }
+  
+  #restartBtn {
     padding:6px 12px;
     border-radius:8px;
     border:1px solid #cbd5e1;
-    background:#ffffff;
+    background:#fff;
     cursor:pointer;
-}
-
-/* ===== 棋盤外框 ===== */
-.board-wrap {
+  }
+  
+  /* 棋盤外框 */
+  .board-wrap {
     background: linear-gradient(180deg,#eaf5ef,#d9efe4);
     padding:12px;
     border-radius:14px;
     box-shadow:0 8px 24px rgba(0,0,0,0.15);
-}
-
-/* ===== 棋盤 ===== */
-.board {
+  }
+  
+  /* 棋盤格子 */
+  .board {
     width:var(--board-size);
     height:var(--board-size);
     display:grid;
@@ -53,10 +53,9 @@ h1 { text-align:center; margin:0 0 14px; }
     padding:4px;
     background:#2f8a58;
     border-radius:10px;
-}
-
-/* ===== 格子 ===== */
-.cell {
+  }
+  
+  .cell {
     position:relative;
     border-radius:8px;
     display:flex;
@@ -65,42 +64,37 @@ h1 { text-align:center; margin:0 0 14px; }
     background:linear-gradient(180deg,#3fa36a,#2f8a58);
     cursor:pointer;
     perspective:800px;
-}
-.cell.disabled { cursor:default; opacity:0.9; }
-
-/* ===== 棋子（3D 翻面） ===== */
-.piece {
+  }
+  .cell.disabled { cursor:default; opacity:0.9; }
+  
+  /* 棋子 */
+  .piece {
     width:78%;
     height:78%;
     position:relative;
     transform-style: preserve-3d;
-    transition: transform 0.8s ease;
-}
-.piece.flip { transform: rotateY(180deg); }
-
-/* 正反面共用設定 */
-.piece::before, .piece::after {
+    transition: transform 0.4s ease;
+    border-radius:50%;
+  }
+  .piece.flip { transform: rotateY(180deg); }
+  
+  /* 正反面 */
+  .piece::before,.piece::after {
     content:"";
     position:absolute;
     inset:0;
     border-radius:50%;
     backface-visibility:hidden;
     box-shadow:0 4px 10px rgba(0,0,0,0.35);
-}
-
-/* 正面 */
-.piece.black::before { background: radial-gradient(circle at 30% 30%,#444,#000); }
-.piece.white::before { background: radial-gradient(circle at 30% 30%,#fff,#e5e7eb); border:1px solid rgba(0,0,0,0.1); }
-
-/* 背面（翻過去的樣子） */
-.piece.black::after { transform: rotateY(180deg); background: radial-gradient(circle at 30% 30%,#fff,#e5e7eb); }
-.piece.white::after { transform: rotateY(180deg); background: radial-gradient(circle at 30% 30%,#444,#000); }
-
-/* 可下位置提示 */
-.cell.possible { background: rgba(255,255,255,0.18); }
-
-/* 翻子提示數字 */
-.hint {
+  }
+  .piece.black::before { background: radial-gradient(circle at 30% 30%,#444,#000); }
+  .piece.white::before { background: radial-gradient(circle at 30% 30%,#fff,#e5e7eb); border:1px solid rgba(0,0,0,0.1);}
+  .piece.black::after { transform: rotateY(180deg); background: radial-gradient(circle at 30% 30%,#fff,#e5e7eb); }
+  .piece.white::after { transform: rotateY(180deg); background: radial-gradient(circle at 30% 30%,#444,#000); }
+  
+  /* 可下棋提示 */
+  .cell.possible { background: rgba(255,255,255,0.18); }
+  .hint {
     position:absolute;
     right:6px;
     bottom:6px;
@@ -110,16 +104,8 @@ h1 { text-align:center; margin:0 0 14px; }
     padding:2px 5px;
     border-radius:999px;
     box-shadow:0 1px 3px rgba(0,0,0,0.2);
-}
-
-/* ===== RWD ===== */
-@media(max-width:520px){
-    :root{ --board-size:360px; }
-}
-
-
-
-
-
-
-
+  }
+  
+  /* RWD */
+  @media(max-width:520px){ :root{ --board-size:360px; } }
+  

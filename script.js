@@ -8,11 +8,7 @@ const blackScoreEl = document.getElementById('blackScore');
 const whiteScoreEl = document.getElementById('whiteScore');
 const restartBtn = document.getElementById('restartBtn');
 
-const DIRS = [
-  [-1,-1],[-1,0],[-1,1],
-  [0,-1],[0,1],
-  [1,-1],[1,0],[1,1]
-];
+const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
 
 /* ===== 初始化棋盤 ===== */
 function initBoard(){
@@ -28,25 +24,17 @@ function initBoard(){
 
 /* ===== 工具函數 ===== */
 function within(r,c){ return r>=0 && r<SIZE && c>=0 && c<SIZE; }
-
 function flipsForMove(r,c,player){
   if(board[r][c]!==0) return [];
   const opp = player===1?2:1;
   let result = [];
   for(const [dr,dc] of DIRS){
-    let rr=r+dr, cc=c+dc;
-    const line=[];
-    while(within(rr,cc)&&board[rr][cc]===opp){
-      line.push([rr,cc]);
-      rr+=dr; cc+=dc;
-    }
-    if(line.length && within(rr,cc)&&board[rr][cc]===player){
-      result=result.concat(line);
-    }
+    let rr=r+dr, cc=c+dc, line=[];
+    while(within(rr,cc)&&board[rr][cc]===opp){ line.push([rr,cc]); rr+=dr; cc+=dc; }
+    if(line.length && within(rr,cc)&&board[rr][cc]===player) result=result.concat(line);
   }
   return result;
 }
-
 function getLegalMoves(player){
   const m=new Map();
   for(let r=0;r<SIZE;r++)
@@ -56,13 +44,9 @@ function getLegalMoves(player){
     }
   return m;
 }
-
 function computeScore(){
   let b=0,w=0;
-  board.flat().forEach(v=>{
-    if(v===1)b++;
-    if(v===2)w++;
-  });
+  board.flat().forEach(v=>{ if(v===1)b++; if(v===2)w++; });
   return {b,w};
 }
 
@@ -77,10 +61,7 @@ function placeMoveAnimated(r, c, player, flips, done) {
     cell.appendChild(piece);
     board[r][c] = player;
 
-    if (flips.length === 0) {
-        if (done) done();
-        return;
-    }
+    if (flips.length === 0) { if (done) done(); return; }
 
     flips.forEach(([rr, cc], i) => {
         setTimeout(() => {
@@ -97,37 +78,42 @@ function placeMoveAnimated(r, c, player, flips, done) {
 
             board[rr][cc] = player;
 
-            if (i === flips.length - 1 && done) {
-                setTimeout(done, 450);
-            }
+            if (i === flips.length - 1 && done) setTimeout(done, 450);
         }, i * 150);
     });
 }
 
 /* ===== AI ===== */
 function aiMove(){
-  if(current!==2) return;
-  const moves=getLegalMoves(2);
-  if(moves.size===0){ current=1; render(); return; }
-
-  let best=null,max=-1;
-  for(const [k,f] of moves){
-    if(f.length>max){
-      max=f.length;
-      const [r,c]=k.split(',').map(Number);
-      best={r,c,flips:f};
+    if(current!==2) return;
+    const moves = getLegalMoves(2);
+    if(moves.size===0){
+        setTimeout(()=>{
+            current = 1;
+            render();
+        }, 1000); // 延遲 1 秒再回到玩家
+        return;
     }
-  }
 
-  placeMoveAnimated(best.r,best.c,2,best.flips,()=>{
-    current=1;
-    render();
-  });
+    let best=null, max=-1;
+    for(const [k,f] of moves){
+        if(f.length>max){
+            max=f.length;
+            const [r,c] = k.split(',').map(Number);
+            best = {r,c,flips:f};
+        }
+    }
+
+    placeMoveAnimated(best.r,best.c,2,best.flips, ()=>{
+        current = 1;
+        render();
+    });
 }
+
 
 /* ===== UI ===== */
 function render(){
-  boardEl.innerHTML=''; // 重新生成格子，但棋子翻轉動畫已經在 placeMoveAnimated 控制
+  boardEl.innerHTML='';
   const moves=getLegalMoves(current);
 
   for(let r=0;r<SIZE;r++)
@@ -174,13 +160,3 @@ function render(){
 
 restartBtn.onclick=initBoard;
 initBoard();
-
-
-
-
-
-
-
-
-
-
