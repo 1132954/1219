@@ -89,7 +89,7 @@ function placeMoveAnimated(r, c, player, flips, done){
       setTimeout(() => {
         board[rr][cc] = player;
         render();
-      }, 220);
+      }, 400);
 
       // 全部翻完後才換手
       if(index === flips.length - 1 && done){
@@ -172,5 +172,6 @@ function render(){
 
 restartBtn.onclick=initBoard;
 initBoard();
+
 
 
