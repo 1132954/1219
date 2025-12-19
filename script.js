@@ -73,33 +73,42 @@ function placeMoveAnimated(r, c, player, flips, done){
   board[r][c] = player;
   render();
 
-  flips.forEach(([rr, cc], index) => {
-    setTimeout(() => {
-      // 找到該棋子的 DOM
-      const piece = document.querySelector(
-        `.cell[data-r="${rr}"][data-c="${cc}"] .piece`
-      );
+  let index = 0;
 
-      if(piece){
-        // 先翻動畫
-        piece.classList.add('flip');
-      }
+  function flipNext(){
+    if(index >= flips.length){
+      if(done) done();
+      return;
+    }
 
-      // 翻到一半時才真的換顏色
-      setTimeout(() => {
+    const [rr, cc] = flips[index];
+    const piece = document.querySelector(`.cell[data-r="${rr}"][data-c="${cc}"] .piece`);
+
+    if(piece){
+      piece.classList.add('flip');
+      // 等動畫一半時間再真正改顏色
+      setTimeout(()=>{
         board[rr][cc] = player;
         render();
       }, 400);
 
-      // 全部翻完後才換手
-      if(index === flips.length - 1 && done){
-        setTimeout(done, 450);
-      }
-    }, index * 300); // 每顆依序翻
-  });
+      // 下一顆棋子延遲 500ms 再翻
+      setTimeout(()=>{
+        index++;
+        flipNext();
+      }, 500);
+    } else {
+      index++;
+      flipNext();
+    }
+  }
 
+  flipNext();
+
+  // 如果沒有任何要翻的棋子
   if(flips.length === 0 && done) done();
 }
+
 
 
 /* ===== AI ===== */
@@ -172,6 +181,7 @@ function render(){
 
 restartBtn.onclick=initBoard;
 initBoard();
+
 
 
 
