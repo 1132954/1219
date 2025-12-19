@@ -68,28 +68,39 @@ function computeScore(){
 }
 
 /* ===== 依序翻棋動畫 ===== */
-function placeMoveAnimated(r,c,player,flips,done){
-  board[r][c]=player;
+function placeMoveAnimated(r, c, player, flips, done){
+  // 先放新棋
+  board[r][c] = player;
   render();
 
-  flips.forEach(([rr,cc],i)=>{
-    setTimeout(()=>{
-      board[rr][cc]=player;
-      render();
-
-      const piece=document.querySelector(
+  flips.forEach(([rr, cc], index) => {
+    setTimeout(() => {
+      // 找到該棋子的 DOM
+      const piece = document.querySelector(
         `.cell[data-r="${rr}"][data-c="${cc}"] .piece`
       );
-      if(piece) piece.classList.add('flip');
 
-      if(i===flips.length-1 && done){
-        setTimeout(done,200);
+      if(piece){
+        // 先翻動畫
+        piece.classList.add('flip');
       }
-    }, i*120);
+
+      // 翻到一半時才真的換顏色
+      setTimeout(() => {
+        board[rr][cc] = player;
+        render();
+      }, 220);
+
+      // 全部翻完後才換手
+      if(index === flips.length - 1 && done){
+        setTimeout(done, 450);
+      }
+    }, index * 150); // 每顆依序翻
   });
 
-  if(flips.length===0 && done) done();
+  if(flips.length === 0 && done) done();
 }
+
 
 /* ===== AI ===== */
 function aiMove(){
@@ -161,3 +172,4 @@ function render(){
 
 restartBtn.onclick=initBoard;
 initBoard();
+
