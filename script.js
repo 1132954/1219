@@ -58,18 +58,30 @@ function placeMoveAnimated(r,c,player,flips,done){
 
   let index=0;
   function flipNext(){
-    if(index>=flips.length){ if(done) done(); return; }
+    if(index>=flips.length){
+      if(done) done(); // 所有棋翻完才呼叫回呼
+      return;
+    }
     const [rr,cc]=flips[index];
     const piece=document.querySelector(`.cell[data-r="${rr}"][data-c="${cc}"] .piece`);
     if(piece){
       piece.classList.add('flip');
-      setTimeout(()=>{ board[rr][cc]=player; render(); }, 500); // 半途改顏色
-      setTimeout(()=>{ index++; flipNext(); }, 1000); // 每顆棋 1 秒
-    } else { index++; flipNext(); }
+      setTimeout(()=>{
+        board[rr][cc]=player;
+        render();
+      }, 500);
+      setTimeout(()=>{
+        index++;
+        flipNext();
+      }, 600); // 每顆棋翻 600ms
+    }else{index++; flipNext();}
   }
   flipNext();
+
+  // 如果沒有要翻的棋，直接呼叫 done
   if(flips.length===0 && done) done();
 }
+
 
 // AI 行動
 function aiMove(){
@@ -141,6 +153,7 @@ function checkEnd(){
 
 restartBtn.onclick = initBoard;
 initBoard();
+
 
 
 
