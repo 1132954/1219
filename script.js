@@ -68,35 +68,37 @@ function computeScore(){
 }
 
 /* ===== 依序翻棋動畫 ===== */
-function placeMoveAnimated(r, c, player, flips, done){
+function placeMoveAnimated(r, c, player, flips, done) {
   // 先放新棋
   board[r][c] = player;
   render();
 
   let index = 0;
 
-  function flipNext(){
-    if(index >= flips.length){
-      if(done) done();
+  function flipNext() {
+    if (index >= flips.length) {
+      if (done) done();
       return;
     }
 
     const [rr, cc] = flips[index];
     const piece = document.querySelector(`.cell[data-r="${rr}"][data-c="${cc}"] .piece`);
 
-    if(piece){
+    if (piece) {
+      // 加上翻面動畫
       piece.classList.add('flip');
-      // 等動畫一半時間再真正改顏色
-      setTimeout(()=>{
+
+      // 翻面動畫一半時間後才改顏色
+      setTimeout(() => {
         board[rr][cc] = player;
         render();
-      }, 400);
+      }, 500); // 一半時間：500ms
 
-      // 下一顆棋子延遲 500ms 再翻
-      setTimeout(()=>{
+      // 下一顆棋子在 1 秒後開始翻
+      setTimeout(() => {
         index++;
         flipNext();
-      }, 500);
+      }, 1000);
     } else {
       index++;
       flipNext();
@@ -106,7 +108,7 @@ function placeMoveAnimated(r, c, player, flips, done){
   flipNext();
 
   // 如果沒有任何要翻的棋子
-  if(flips.length === 0 && done) done();
+  if (flips.length === 0 && done) done();
 }
 
 
@@ -181,6 +183,7 @@ function render(){
 
 restartBtn.onclick=initBoard;
 initBoard();
+
 
 
 
