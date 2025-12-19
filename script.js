@@ -14,6 +14,7 @@ const DIRS = [
   [1,-1],[1,0],[1,1]
 ];
 
+/* ===== 初始化棋盤 ===== */
 function initBoard(){
   board = Array.from({length:SIZE},()=>Array(SIZE).fill(0));
   const m = SIZE/2;
@@ -25,6 +26,7 @@ function initBoard(){
   render();
 }
 
+/* ===== 工具函數 ===== */
 function within(r,c){ return r>=0 && r<SIZE && c>=0 && c<SIZE; }
 
 function flipsForMove(r,c,player){
@@ -64,19 +66,42 @@ function computeScore(){
   return {b,w};
 }
 
-function placeMoveAnimated(r,c,player,flips,done){
-  board[r][c]=player;
-  render();
-  flips.forEach(([rr,cc],i)=>{
-    setTimeout(()=>{
-      board[rr][cc]=player;
-      render();
-      const piece=document.querySelector(`.cell[data-r="${rr}"][data-c="${cc}"] .piece`);
-      if(piece) piece.classList.add('flip');
-      if(i===flips.length-1 && done) setTimeout(done,200);
-    }, i*120);
-  });
-  if(flips.length===0 && done) done();
+/* ===== 動畫下棋 ===== */
+function placeMoveAnimated(r, c, player, flips, done) {
+    const cell = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+    if (!cell) return;
+
+    // 新棋子
+    const piece = document.createElement('div');
+    piece.className = 'piece ' + (player===1 ? 'black' : 'white');
+    cell.appendChild(piece);
+    board[r][c] = player;
+
+    if (flips.length === 0) {
+        if (done) done();
+        return;
+    }
+
+    flips.forEach(([rr, cc], i) => {
+        setTimeout(() => {
+            const flipCell = document.querySelector(`.cell[data-r="${rr}"][data-c="${cc}"] .piece`);
+            if (!flipCell) return;
+
+            flipCell.classList.add('flip');
+
+            setTimeout(() => {
+                flipCell.classList.remove('black','white');
+                flipCell.classList.add(player===1?'black':'white');
+                flipCell.classList.remove('flip');
+            }, 400);
+
+            board[rr][cc] = player;
+
+            if (i === flips.length - 1 && done) {
+                setTimeout(done, 450);
+            }
+        }, i * 150);
+    });
 }
 
 /* ===== AI ===== */
@@ -84,6 +109,7 @@ function aiMove(){
   if(current!==2) return;
   const moves=getLegalMoves(2);
   if(moves.size===0){ current=1; render(); return; }
+
   let best=null,max=-1;
   for(const [k,f] of moves){
     if(f.length>max){
@@ -92,6 +118,7 @@ function aiMove(){
       best={r,c,flips:f};
     }
   }
+
   placeMoveAnimated(best.r,best.c,2,best.flips,()=>{
     current=1;
     render();
@@ -100,7 +127,7 @@ function aiMove(){
 
 /* ===== UI ===== */
 function render(){
-  boardEl.innerHTML='';
+  boardEl.innerHTML=''; // 重新生成格子，但棋子翻轉動畫已經在 placeMoveAnimated 控制
   const moves=getLegalMoves(current);
 
   for(let r=0;r<SIZE;r++)
@@ -112,7 +139,7 @@ function render(){
 
       if(board[r][c]){
         const p=document.createElement('div');
-        p.className='piece '+(board[r][c]===1?'black':'white');
+        p.className='piece ' + (board[r][c]===1?'black':'white');
         cell.appendChild(p);
       }
 
@@ -123,8 +150,10 @@ function render(){
         h.className='hint';
         h.textContent=moves.get(key).length;
         cell.appendChild(h);
+
         cell.onclick=()=>{ 
-          placeMoveAnimated(r,c,1,moves.get(key),()=>{
+          const flips = moves.get(key);
+          placeMoveAnimated(r,c,1,flips,()=>{
             current=2;
             render();
             setTimeout(aiMove,400);
@@ -145,6 +174,8 @@ function render(){
 
 restartBtn.onclick=initBoard;
 initBoard();
+
+
 
 
 
